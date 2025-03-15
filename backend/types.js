@@ -1,4 +1,4 @@
-const z = require("zod");
+import z from "zod";
 
 const UserValidation = z.object({
   username: z.string().email(),
@@ -7,16 +7,18 @@ const UserValidation = z.object({
   password: z.string(),
 });
 
-const inputValidation = z.object({
+const SigninBody = z.object({
+  username : z.string().email(),
+  password : z.string()
+})
+
+const updateBody = z.object({
+  password: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  password: z.string().optional(),
 });
 
-module.exports = {
-  UserValidation: UserValidation,
-  inputValidation:inputValidation
-};
+export { UserValidation,SigninBody ,updateBody };
 
 // "safe" parsing (doesn't throw error if validation fails)
 // mySchema.safeParse("tuna"); // => { success: true; data: "tuna" }

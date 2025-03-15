@@ -1,9 +1,9 @@
-const express = require("express");
-const userRouter=require("./user.js")
-const accountRouter=require("./account.js")
+import { Router } from 'express';
+import userRouter from "./user.js";
+import accountRouter from "./account.js";
 
 // Single routing
-const router = express.Router();
+const router = Router();
 
 
 router.use("/user",userRouter);
@@ -12,7 +12,8 @@ router.use("/account",accountRouter);
 
 
 
-module.exports = router;
+export default router;
+
 
 
 

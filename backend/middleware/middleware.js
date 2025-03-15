@@ -1,22 +1,29 @@
-const jwt = require("jsonwebtoken");
-const jwtSecretPassword = require("../config");
+import jwt from "jsonwebtoken";
+import jwtSecretPassword from "../config.js";
 
 function authMiddleware(req, res, next) {
   const token =
     req.headers.authorization && req.headers.authorization.split(" ")[1];
 
-  //verify token with secret key
+  if (!token) {
+    return res.status(403).json({
+      message: "Authentication denied!",
+    });
+  }
+
+  //----------------------------------------------------------------------------------------
+  //                        Verify token with secret key
+  //----------------------------------------------------------------------------------------
   try {
     const decoded = jwt.verify(token, jwtSecretPassword);
-
-    if (decoded.userId) {
-      //Learnt where this userId is coming from. jwt sign takes user info, so we provided userId there, jwt.sign({ userId}, jwtSecretPassword);. So we're retrieving this
-      req.userId = decoded.userId;
-      next();
-    }
+    req.userId = decoded.userId; // userId we can fetch later via request itself
+    
+    next();
   } catch (err) {
-    res.status(403).json({});
+    res.status(403).json({
+      message: err.message,
+    });
   }
 }
 
-module.exports = { authMiddleware };
+export { authMiddleware };

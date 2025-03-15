@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
-const { number } = require("zod");
-// mongoose.connect("mongodb://localhost:27017/payment_app?" +
-//   'replicaSet=rs');
-mongoose.connect("mongodb://localhost:27017/payment_app?directConnection=true" );
+import mongoose from "mongoose";
+
+mongoose.connect(
+  "mongodb+srv://equilita:ZedtZoyXDJO7e4z9@shiftpay.t8wqf.mongodb.net/?retryWrites=true&w=majority&appName=ShiftPay"
+);
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -42,6 +42,4 @@ const accountSchema = new mongoose.Schema({
 const Users = mongoose.model("Users", userSchema);
 const Accounts = mongoose.model("Accounts", accountSchema);
 
-module.exports = {
-  Users,Accounts
-};
+export { Users, Accounts };

@@ -1,0 +1,114 @@
+Problem : 
+Access Token is genereted while signup, while signing in when i put that token with bearer attached in header, I am getting error as Invalid Token
+POST req. working fine. In GET req. I am getting error
+-------------------------------------
+
+user.js file
+const express = require("express");
+// Single routing
+const router = express.Router();
+
+//-------------
+const { Users } = require("../db.js");
+const { UserValidation } = require("../types.js");
+const jwt = require("jsonwebtoken");
+// const jwtSecretPassword = require("../config.js");
+
+
+const bcrypt = require("bcrypt");
+const cors = require("cors");
+const app = express()
+app.use(cors())
+
+//-------------
+const {authMiddleware}=require("../middleware/middleware.js")
+const fs = require('fs');
+const jwtSecretPassword = fs.readFileSync('./config.js');  // Read private key from a file
+
+//-----------
+
+
+router.post("/signup", async (req, res) => {
+  const { firstName, lastName, password, username } = req.body;
+  const bool = UserValidation.safeParse(req.body).success;
+
+  if (!bool) {
+    return res.status(400).send("Invalid Input");
+  }
+
+  const userPresent = await Users.findOne({ username });
+  if (userPresent) {
+    return res.status(409).json({
+      mess: "User already created",
+    });
+  }
+
+  //We'll convert normal password to hash password and then will store it in db
+  const hashedPassword = await bcrypt.hash(password, 10);
+  //await Users.create(req.body)
+  await Users.create({
+    username,
+    firstName,
+    lastName,
+    password: hashedPassword,
+  });
+  const accessToken = jwt.sign({ userId: Users._id }, jwtSecretPassword);
+
+  return res.json({
+    message: "User created successfully",
+    accessToken:accessToken
+  });
+});
+
+
+router.get("/signin",authMiddleware, async (req, res) => {
+  const body = req.body;
+  const isValid = UserValidation.safeParse(body).success;
+
+  if (!isValid) {
+    return res.send("Invalid Input");
+  }
+
+  // const userPresentInDb = await Users.findOne({ username:body.username });
+  // if (!userPresentInDb) {
+  //   return res.send("User doesn't exists");
+  // }
+
+  // const userAllowed =  bcrypt.compare(body.password, userPresentInDb.password);
+
+  if (!userAllowed) {
+    return res.send("No user found or Invalid password");
+  }
+    // const accessToken = jwt.sign({ userId: userPresentInDb._id }, jwtSecretPassword);
+  
+  res.json({
+    userId: userId,
+  });
+});
+
+module.exports = router;
+
+----------------------------
+middleware.js file
+
+
+const jwt =require("jsonwebtoken")
+const jwtSecretPassword=require("../config")
+
+function authMiddleware(req, res, next) {
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  // 2. verify token with secret key
+  jwt.verify(token, jwtSecretPassword, async (err, decoded) => {
+    // 3. allow user to get all users from mongodb
+    if (decoded) {
+      req.userId=decoded.userId;
+      next();
+    } else if (err) {
+      res.status(403).json({});
+    }
+  });
+}
+
+module.exports={authMiddleware};

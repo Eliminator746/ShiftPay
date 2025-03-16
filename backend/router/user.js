@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import { Router } from "express";
 import jwt from "jsonwebtoken";
 import jwtSecretPassword from "../config.js";
 import { Users, Accounts } from "../db.js";
-import { UserValidation,SigninBody ,updateBody } from "../types.js";
+import { UserValidation, SigninBody, updateBody } from "../types.js";
 import { authMiddleware } from "../middleware/middleware.js";
 const router = Router();
 
@@ -14,7 +14,7 @@ router.post("/signup", async (req, res) => {
   const bool = UserValidation.safeParse(req.body).success;
 
   if (!bool) {
-    return res.status(400).send("Invalid Input");
+    return res.status(400).send("Input fields missing");
   }
 
   const userPresent = await Users.findOne({ username });
@@ -36,7 +36,7 @@ router.post("/signup", async (req, res) => {
   const bal = Math.floor(Math.random() * 10000) + 1;
   await Accounts.create({
     userId: currentUser._id,
-    balance : bal,
+    balance: bal,
   });
 
   return res.json({
@@ -48,8 +48,9 @@ router.post("/signup", async (req, res) => {
 //----------------------------------------------------------------------------------------
 //                                    SignIn
 //----------------------------------------------------------------------------------------
-router.get("/signin", async (req, res) => {
-  
+router.post("/signin", async (req, res) => {
+  console.log(req.body);
+
   const isValid = SigninBody.safeParse(req.body).success;
   if (!isValid) {
     return res.status(400).send("Invalid Input");
@@ -76,12 +77,19 @@ router.get("/signin", async (req, res) => {
   });
 });
 
+router.get("/currentuser", authMiddleware, async (req, res) => {
+  if (!req.userId)
+    return res.status(400).json({ message: "User ID not found" });
+  const user= await Users.findById(req.userId)
+  console.log(user);
+  
+  return res.status(200).json({ user: user.firstName });
+});
 
 //----------------------------------------------------------------------------------------
 //                                    Update User Details
 //----------------------------------------------------------------------------------------
 router.put("/", authMiddleware, async (req, res) => {
-  
   const input = req.body;
   const success = updateBody.safeParse(input).success;
 

@@ -4,7 +4,7 @@ const UserValidation = z.object({
   username: z.string().email(),
   firstName: z.string(),
   lastName: z.string(),
-  password: z.string(),
+  password: z.string().min(6),
 });
 
 const SigninBody = z.object({

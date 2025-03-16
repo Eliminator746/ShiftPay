@@ -37,8 +37,8 @@ function User({ items }) {
     const { firstName, lastName } = items;
     const navigate= useNavigate();
 
-    const handlePayment= () => {
-        navigate('/sendmoney')
+    const handlePayment= (e) => {
+        navigate("/sendmoney?id=" + items.userId + "&name=" + firstName);
     }
     return (
         <div className="flex justify-between items-center">
